@@ -1,1 +1,2699 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NationShield | РП политический сервер 1.21+</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        @font-face {
+            font-family: 'Minecraft Custom';
+            src: url('https://raw.githubusercontent.com/nationshieldserverminecraft-ship-it/nationshieldserverminecraft-ship-it.github.io/main/minecraft.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            overflow: hidden;
+        }
+        
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            will-change: opacity;
+        }
+        
+        .bg-image.active {
+            opacity: 1;
+        }
+        
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.55) 0%, rgba(10, 10, 15, 0.65) 100%);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        body {
+            background-color: #0a0a0c;
+            font-family: 'Minecraft Custom', 'Courier New', monospace;
+            color: #e1e7f0;
+            min-height: 100vh;
+            padding: 1.5rem;
+            position: relative;
+            font-size: 0.85rem;
+        }
+
+        .hamburger-menu {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            background: #1a1c20;
+            border: 2px solid #2b2d31;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .hamburger-menu:hover {
+            border-color: #e0b354;
+            transform: scale(1.05);
+        }
+        
+        .hamburger-line {
+            width: 28px;
+            height: 3px;
+            background-color: #e0b354;
+            transition: all 0.3s ease;
+        }
+        
+        .forum-fullscreen {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0c;
+            z-index: 2000;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .forum-fullscreen.open {
+            left: 0;
+        }
+        
+        .forum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #111214;
+            border-bottom: 2px solid #2b2d31;
+        }
+        
+        .forum-header h2 {
+            color: #e0b354;
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+        
+        .forum-close-btn {
+            width: 40px;
+            height: 40px;
+            background: #1a1c20;
+            border: 2px solid #2b2d31;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .forum-close-btn:hover {
+            border-color: #e0b354;
+        }
+        
+        .close-line {
+            width: 20px;
+            height: 3px;
+            background-color: #e0b354;
+        }
+        
+        .close-line:nth-child(1) {
+            transform: rotate(45deg) translate(4px, 4px);
+        }
+        
+        .close-line:nth-child(2) {
+            transform: rotate(-45deg) translate(4px, -4px);
+        }
+        
+        .forum-profile-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: #1a1c20;
+            border-bottom: 2px solid #2b2d31;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #e0b354;
+            background: #0a0a0c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+        
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            border-color: #f0c674;
+        }
+        
+        .profile-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .profile-name {
+            color: #e0b354;
+            font-size: 0.8rem;
+        }
+        
+        .profile-name:hover {
+            text-decoration: underline;
+        }
+        
+        .profile-bio {
+            color: #6d737c;
+            font-size: 0.55rem;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .forum-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .forum-action-btn {
+            background: #2b2d31;
+            border: 1px solid #3b3f48;
+            padding: 6px 12px;
+            color: #dbdee1;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.6rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .forum-action-btn:hover {
+            background: #e0b354;
+            color: #0a0a0c;
+            border-color: #e0b354;
+        }
+        
+        .forum-posts-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .forum-post {
+            background: #111214;
+            border: 2px solid #2b2d31;
+            margin-bottom: 20px;
+            padding: 15px;
+            position: relative;
+        }
+        
+        .forum-post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2b2d31;
+        }
+        
+        .forum-post-author {
+            color: #e0b354;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .forum-post-author:hover {
+            text-decoration: underline;
+        }
+        
+        .author-avatar-small {
+            width: 24px;
+            height: 24px;
+            border: 1px solid #e0b354;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a0c;
+            font-size: 1rem;
+        }
+        
+        .forum-post-date {
+            color: #6d737c;
+            font-size: 0.55rem;
+        }
+        
+        .forum-post-content {
+            color: #dbdee1;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+            margin-bottom: 10px;
+        }
+        
+        .forum-post-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+        
+        .like-btn, .dislike-btn {
+            background: transparent;
+            border: none;
+            color: #6d737c;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.55rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .like-btn:hover, .dislike-btn:hover {
+            color: #e0b354;
+        }
+        
+        .like-btn.active {
+            color: #4caf50;
+        }
+        
+        .dislike-btn.active {
+            color: #f44336;
+        }
+        
+        .forum-post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #2b2d31;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .action-btn-small {
+            background: transparent;
+            border: none;
+            color: #6d737c;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.55rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: all 0.2s;
+        }
+        
+        .action-btn-small:hover {
+            color: #e0b354;
+        }
+        
+        .three-dots-btn {
+            background: transparent;
+            border: none;
+            color: #6d737c;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: all 0.2s;
+        }
+        
+        .three-dots-btn:hover {
+            color: #e0b354;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            right: 15px;
+            background: #1a1c20;
+            border: 2px solid #2b2d31;
+            z-index: 100;
+            min-width: 120px;
+        }
+        
+        .dropdown-menu button {
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            color: #dbdee1;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.6rem;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        .dropdown-menu button:hover {
+            background: #2b2d31;
+            color: #e0b354;
+        }
+        
+        .comments-section {
+            margin-top: 12px;
+            padding-left: 15px;
+            border-left: 2px solid #2b2d31;
+        }
+        
+        .comment {
+            background: #0a0a0c;
+            margin-top: 8px;
+            padding: 8px;
+            border: 1px solid #2b2d31;
+            position: relative;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #2b2d31;
+        }
+        
+        .comment-author {
+            color: #e0b354;
+            font-size: 0.6rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .comment-author:hover {
+            text-decoration: underline;
+        }
+        
+        .comment-date {
+            color: #6d737c;
+            font-size: 0.5rem;
+        }
+        
+        .comment-content {
+            color: #dbdee1;
+            font-size: 0.65rem;
+            line-height: 1.3;
+            word-wrap: break-word;
+            margin-bottom: 5px;
+        }
+        
+        .reply-quote {
+            background: rgba(26, 28, 32, 0.8);
+            border-left: 3px solid #e0b354;
+            padding: 4px 8px;
+            margin-bottom: 6px;
+            font-size: 0.55rem;
+            color: #6d737c;
+        }
+        
+        .comment-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+        }
+        
+        .reply-btn {
+            background: transparent;
+            border: none;
+            color: #6d737c;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.5rem;
+            cursor: pointer;
+            padding: 2px 6px;
+        }
+        
+        .reply-btn:hover {
+            color: #e0b354;
+        }
+        
+        .comment-three-dots {
+            background: transparent;
+            border: none;
+            color: #6d737c;
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 2px 4px;
+        }
+        
+        .comment-three-dots:hover {
+            color: #e0b354;
+        }
+        
+        .replies {
+            margin-top: 8px;
+            padding-left: 0px;
+        }
+        
+        .comment-form {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .comment-form textarea {
+            width: 100%;
+            padding: 6px;
+            background: #0a0a0c;
+            border: 1px solid #3b3f48;
+            color: #e1e7f0;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.6rem;
+            resize: vertical;
+        }
+        
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: #e0b354;
+        }
+        
+        .comment-form button {
+            background: #e0b354;
+            border: 1px solid #e0b354;
+            padding: 4px 10px;
+            color: #0a0a0c;
+            font-family: 'Minecraft Custom', monospace;
+            cursor: pointer;
+            width: fit-content;
+            font-size: 0.55rem;
+        }
+        
+        .comment-form button:hover {
+            background: #f0c674;
+        }
+        
+        .new-post-form {
+            background: #111214;
+            border-top: 2px solid #2b2d31;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .new-post-form textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0a0a0c;
+            border: 2px solid #3b3f48;
+            color: #e1e7f0;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.7rem;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        
+        .new-post-form textarea:focus {
+            outline: none;
+            border-color: #e0b354;
+        }
+        
+        .new-post-form button {
+            background: #e0b354;
+            border: 2px solid #e0b354;
+            padding: 8px 15px;
+            color: #0a0a0c;
+            font-family: 'Minecraft Custom', monospace;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.7rem;
+        }
+        
+        .new-post-form button:hover {
+            background: #f0c674;
+            transform: translateY(-2px);
+        }
+        
+        .no-posts-message {
+            text-align: center;
+            color: #6d737c;
+            padding: 30px;
+            font-size: 0.7rem;
+        }
+        
+        .forum-auth {
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.open {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #1a1c20;
+            border: 2px solid #e0b354;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h3 {
+            color: #e0b354;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .modal-content .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .modal-content label {
+            display: block;
+            font-size: 0.65rem;
+            color: #e0b354;
+            margin-bottom: 5px;
+        }
+        
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 8px;
+            background: #0a0a0c;
+            border: 2px solid #3b3f48;
+            color: #e1e7f0;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.7rem;
+        }
+        
+        .modal-content input:focus, .modal-content textarea:focus {
+            outline: none;
+            border-color: #e0b354;
+        }
+        
+        .avatar-gallery {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #0a0a0c;
+            border: 2px solid #2b2d31;
+        }
+        
+        .avatar-option {
+            aspect-ratio: 1;
+            background: #111214;
+            border: 2px solid #3b3f48;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .avatar-option:hover, .avatar-option.selected {
+            border-color: #e0b354;
+            transform: scale(1.05);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+            padding: 8px;
+            background: #e0b354;
+            border: 2px solid #e0b354;
+            color: #0a0a0c;
+            font-family: 'Minecraft Custom', monospace;
+            cursor: pointer;
+        }
+        
+        .modal-buttons button:last-child {
+            background: #4a4a4a;
+            border-color: #4a4a4a;
+        }
+        
+        .profile-view-modal .modal-content {
+            text-align: center;
+        }
+        
+        .profile-view-avatar {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        
+        .profile-view-name {
+            color: #e0b354;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .profile-view-bio {
+            color: #dbdee1;
+            font-size: 0.7rem;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #0a0a0c;
+            border: 1px solid #2b2d31;
+        }
+        
+        .profile-view-stats {
+            color: #6d737c;
+            font-size: 0.6rem;
+            margin-top: 10px;
+        }
+
+        .online-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #4caf50;
+            border-radius: 50%;
+            margin-left: 8px;
+            box-shadow: 0 0 3px #4caf50;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0c;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+        }
+        .loading-screen.hide {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            border: 3px solid #e0b354;
+            animation: pulseGlow 1.5s infinite;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(224, 179, 84, 0.4); transform: scale(0.98); }
+            70% { box-shadow: 0 0 0 20px rgba(224, 179, 84, 0); transform: scale(1.02); }
+            100% { box-shadow: 0 0 0 0 rgba(224, 179, 84, 0); transform: scale(0.98); }
+        }
+        .loading-text {
+            font-family: 'Minecraft Custom', monospace;
+            color: #e0b354;
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            animation: blinkText 1.5s step-end infinite;
+        }
+        @keyframes blinkText {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .loading-progress {
+            width: 200px;
+            height: 3px;
+            background: #2b2d31;
+            margin-top: 20px;
+        }
+        .loading-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #e0b354;
+            transition: width 0.3s ease;
+        }
+
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        .main-content.visible {
+            opacity: 1;
+        }
+
+        .discord-card {
+            max-width: 1000px;
+            width: 100%;
+            margin: 100px auto 0 auto;
+            background: rgba(26, 28, 32, 0.92);
+            backdrop-filter: blur(2px);
+            box-shadow: 0 0 0 2px #2b2d31, 0 8px 16px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        .site-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #2b2d31;
+            padding-bottom: 1rem;
+        }
+        .site-title {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e0b354 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-family: 'Minecraft Custom', monospace;
+            letter-spacing: 2px;
+        }
+        .sub-badge {
+            font-size: 0.65rem;
+            color: #c9a54b;
+            margin-top: 6px;
+            font-feature-settings: normal;
+            text-rendering: geometricPrecision;
+        }
+
+        .discord-tabs {
+            display: flex;
+            gap: 2px;
+            background: #111214;
+            padding: 2px;
+            margin-bottom: 1.8rem;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.8rem;
+            color: #dbdee1;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover {
+            background: #2b2d31;
+            color: #ffffff;
+        }
+        .tab-btn.active {
+            background: #2b2d31;
+            color: #e0b354;
+            border-bottom: 2px solid #e0b354;
+        }
+
+        .content-panel {
+            background: rgba(17, 18, 20, 0.9);
+            backdrop-filter: blur(2px);
+            padding: 1.5rem;
+            border: 2px solid #2b2d31;
+            min-height: 500px;
+        }
+        
+        .tab-pane {
+            display: none;
+            animation: fadeSlide 0.3s ease-out forwards;
+        }
+        .tab-pane.active-pane {
+            display: block;
+        }
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .news-container {
+            background: rgba(17, 18, 20, 0.7);
+            border: 2px solid #2b2d31;
+            padding: 1.5rem;
+            min-height: 400px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        .news-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #e0b354;
+        }
+        
+        .news-error {
+            text-align: center;
+            padding: 2rem;
+            color: #f44336;
+            border-left: 3px solid #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .status-grid {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        .status-card {
+            flex: 1;
+            background: rgba(26, 28, 32, 0.9);
+            padding: 0.8rem;
+            text-align: center;
+            border: 2px solid #2b2d31;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .status-card:hover {
+            border-color: #e0b354;
+            transform: translateY(-2px);
+        }
+        .status-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #e0b354;
+            margin-bottom: 6px;
+        }
+        .status-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #e1e7f0;
+        }
+        .status-sub {
+            font-size: 0.55rem;
+            color: #6d737c;
+            margin-top: 6px;
+        }
+        .online-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #4caf50;
+            animation: pulse 1.5s infinite;
+            margin-right: 6px;
+        }
+        .offline-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #f44336;
+            margin-right: 6px;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .players-list-container {
+            background: rgba(26, 28, 32, 0.9);
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 2px solid #2b2d31;
+        }
+        .players-list-title {
+            font-size: 0.6rem;
+            color: #e0b354;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .players-names-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .player-name-item {
+            background: #0a0a0c;
+            padding: 4px 10px;
+            font-size: 0.65rem;
+            color: #b5bac1;
+            border: 1px solid #3b3f48;
+        }
+        .no-players-message {
+            text-align: center;
+            font-size: 0.65rem;
+            color: #6d737c;
+            padding: 8px;
+        }
+
+        .server-desc {
+            background: rgba(26, 28, 32, 0.9);
+            border-left: 4px solid #e0b354;
+            padding: 0.7rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .address-dark-card {
+            background: rgba(26, 28, 32, 0.9);
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            border: 2px solid #2b2d31;
+        }
+        .ip-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #e0b354;
+            margin-bottom: 8px;
+        }
+        .server-ip-clickable {
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 1rem;
+            background: #0a0a0c;
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            color: #e1e7f0;
+            border: 2px solid #3b3f48;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .server-ip-clickable:hover {
+            background: #2b2d31;
+            border-color: #e0b354;
+            color: #e0b354;
+        }
+        .copy-hint {
+            font-size: 0.5rem;
+            margin-top: 8px;
+            color: #6d737c;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.65rem;
+            color: #e0b354;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0a0a0c;
+            border: 2px solid #3b3f48;
+            color: #e1e7f0;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.75rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #e0b354;
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .optional {
+            color: #6d737c;
+            font-size: 0.55rem;
+            margin-left: 5px;
+        }
+        
+        .checkbox-group {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(26, 28, 32, 0.9);
+            padding: 10px;
+            border: 2px solid #2b2d31;
+        }
+        .checkbox-group input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #e0b354;
+        }
+        .checkbox-group label {
+            font-size: 0.65rem;
+            color: #dbdee1;
+            cursor: pointer;
+            margin: 0;
+        }
+        .checkbox-group a {
+            color: #e0b354;
+            text-decoration: none;
+            border-bottom: 1px solid #e0b354;
+        }
+        .checkbox-group a:hover {
+            color: #f0c674;
+        }
+        
+        .warning-text {
+            background: rgba(224, 179, 84, 0.1);
+            border-left: 3px solid #e0b354;
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            color: #e0b354;
+            text-align: center;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .cooldown-text {
+            background: rgba(224, 179, 84, 0.1);
+            border-left: 3px solid #e0b354;
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            color: #e0b354;
+            text-align: center;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .submit-btn {
+            background: #e0b354;
+            border: none;
+            padding: 8px 20px;
+            color: #0a0a0c;
+            font-family: 'Minecraft Custom', monospace;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            border: 2px solid #e0b354;
+            font-size: 0.75rem;
+        }
+        .submit-btn:hover {
+            background: #f0c674;
+            transform: translateY(-2px);
+        }
+        .submit-btn:disabled {
+            background: #3b3f48;
+            color: #6d737c;
+            cursor: not-allowed;
+            transform: none;
+            border-color: #3b3f48;
+        }
+        
+        .action-btn {
+            background: #e0b354;
+            border: 2px solid #e0b354;
+            padding: 8px 20px;
+            color: #0a0a0c;
+            font-family: 'Minecraft Custom', monospace;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.2s;
+            letter-spacing: 1px;
+            font-size: 0.75rem;
+        }
+        .action-btn:hover {
+            background: #f0c674;
+            transform: translateY(-2px);
+        }
+        
+        .logout-btn {
+            background: #4a4a4a;
+            border: 1px solid #6d737c;
+            padding: 4px 12px;
+            color: #dbdee1;
+            cursor: pointer;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.6rem;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: #5a5a5a;
+            transform: translateY(-2px);
+        }
+
+        .footer-dark {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid #2b2d31;
+            font-size: 0.6rem;
+            color: #6d737c;
+        }
+        .version-hidden {
+            position: fixed;
+            bottom: 6px;
+            right: 8px;
+            font-size: 0.5rem;
+            color: rgba(109, 115, 124, 0.4);
+            z-index: 100;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1c20;
+            border: 2px solid #e0b354;
+            padding: 0.5rem 1.2rem;
+            font-family: 'Minecraft Custom', monospace;
+            font-size: 0.65rem;
+            color: #e0b354;
+            z-index: 999;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        
+        .toast.error {
+            border-color: #f44336;
+            color: #f44336;
+        }
+        
+        .toast.success {
+            border-color: #4caf50;
+            color: #4caf50;
+        }
+        
+        @media (max-width: 650px) {
+            body { padding: 0.8rem; }
+            .site-title { font-size: 1.6rem; }
+            .status-value { font-size: 1.2rem; }
+            .status-grid { flex-direction: column; gap: 0.8rem; }
+            .form-row { flex-direction: column; gap: 0.8rem; }
+            .toast { white-space: normal; width: 85%; text-align: center; }
+            .profile-info { flex-wrap: wrap; }
+            .profile-bio { max-width: 150px; }
+            .avatar-gallery { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-container" id="bgContainer"></div>
+<div class="bg-overlay"></div>
+
+<div class="hamburger-menu" id="hamburgerMenu">
+    <div class="hamburger-line"></div>
+    <div class="hamburger-line"></div>
+    <div class="hamburger-line"></div>
+</div>
+
+<div class="forum-fullscreen" id="forumFullscreen">
+    <div class="forum-header">
+        <h2>ФОРУМ СООБЩЕСТВА</h2>
+        <div class="forum-close-btn" id="forumCloseBtn">
+            <div class="close-line"></div>
+            <div class="close-line"></div>
+        </div>
+    </div>
+    
+    <div id="forumContentBlock" style="display: none;">
+        <div class="forum-profile-bar">
+            <div class="profile-info" id="viewMyProfileBtn">
+                <div class="profile-avatar" id="profileAvatarBtn">👤</div>
+                <div class="profile-details">
+                    <span class="profile-name" id="forumUserName"></span>
+                    <span class="profile-bio" id="userBio">Нет описания</span>
+                </div>
+            </div>
+            <div class="forum-actions">
+                <button class="forum-action-btn" id="profileSettingsBtn">⚙️ НАСТРОЙКИ</button>
+            </div>
+        </div>
+        
+        <div class="forum-posts-container" id="forumPostsList"></div>
+        
+        <div class="new-post-form">
+            <textarea id="newPostContent" rows="3" placeholder="НАПИШИТЕ НОВЫЙ ПОСТ..."></textarea>
+            <button id="submitPostBtn">📝 ОПУБЛИКОВАТЬ ПОСТ</button>
+        </div>
+    </div>
+    
+    <div id="forumAuthBlock" class="forum-auth">
+        <div class="warning-text" style="margin-bottom: 15px;">🔒 ДЛЯ ДОСТУПА К ФОРУМУ НЕОБХОДИМА АВТОРИЗАЦИЯ</div>
+        <button class="action-btn" id="forumRedirectBtn">ВОЙТИ В АККАУНТ</button>
+    </div>
+</div>
+
+<div class="modal" id="profileModal">
+    <div class="modal-content">
+        <h3>НАСТРОЙКИ ПРОФИЛЯ</h3>
+        <div class="form-group">
+            <label>ВЫБЕРИТЕ АВАТАР</label>
+            <div class="avatar-gallery" id="avatarGallery"></div>
+        </div>
+        <div class="form-group">
+            <label>ОПИСАНИЕ (BIO)</label>
+            <textarea id="profileBioInput" rows="3" placeholder="Расскажите о себе..."></textarea>
+        </div>
+        <div class="modal-buttons">
+            <button id="saveProfileBtn">СОХРАНИТЬ</button>
+            <button id="closeProfileBtn">ОТМЕНА</button>
+        </div>
+        <div style="margin-top: 15px; border-top: 1px solid #2b2d31; padding-top: 15px;">
+            <button id="logoutFromSettingsBtn" style="width: 100%; background: #4a4a4a; border: 1px solid #6d737c; padding: 8px; color: #dbdee1; font-family: 'Minecraft Custom', monospace; cursor: pointer;">🚪 ВЫЙТИ ИЗ АККАУНТА</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal profile-view-modal" id="profileViewModal">
+    <div class="modal-content">
+        <h3>ПРОФИЛЬ ИГРОКА</h3>
+        <div class="profile-view-avatar" id="viewAvatar"></div>
+        <div class="profile-view-name" id="viewName"></div>
+        <div class="profile-view-bio" id="viewBio"></div>
+        <div class="profile-view-stats" id="viewStats"></div>
+        <div class="modal-buttons" style="margin-top: 20px;">
+            <button id="closeProfileViewBtn">ЗАКРЫТЬ</button>
+        </div>
+    </div>
+</div>
+
+<div class="loading-screen" id="loadingScreen">
+    <div class="loading-text">ЗАГРУЗКА</div>
+    <div class="loading-progress">
+        <div class="loading-progress-bar" id="loadingBar"></div>
+    </div>
+</div>
+
+<div class="main-content" id="mainContent">
+    <div class="discord-card">
+        <div class="card-content">
+            <div class="site-header">
+                <div class="site-title">NATIONSHIELD</div>
+                <div class="sub-badge">РП ПОЛИТИЧЕСКИЙ СЕРВЕР</div>
+            </div>
+
+            <div class="discord-tabs">
+                <button class="tab-btn active" data-tab="main">ГЛАВНАЯ</button>
+                <button class="tab-btn" data-tab="anketa">АНКЕТА</button>
+                <button class="tab-btn" data-tab="rules">ПРАВИЛА</button>
+                <button class="tab-btn" data-tab="news">НОВОСТИ</button>
+            </div>
+
+            <div class="content-panel">
+                <div id="main" class="tab-pane active-pane">
+                    <div class="server-desc">РП политический сервер Minecraft</div>
+
+                    <div class="address-dark-card">
+                        <div class="ip-label">АКТУАЛЬНЫЙ АДРЕС</div>
+                        <div class="server-ip-clickable" id="clickableIp">NationShieldII.play-minecraft.net</div>
+                        <div class="copy-hint">НАЖМИ НА АДРЕС, ЧТОБЫ СКОПИРОВАТЬ</div>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-card" id="onlineCard">
+                            <div class="status-label">ОНЛАЙН</div>
+                            <div class="status-value" id="onlineValue">--</div>
+                            <div class="status-sub" id="onlineSub">ЗАГРУЗКА...</div>
+                        </div>
+                        <div class="status-card" id="versionCard">
+                            <div class="status-label">ВЕРСИЯ</div>
+                            <div class="status-value" id="versionValue">--</div>
+                            <div class="status-sub" id="versionSub">JAVA EDITION</div>
+                        </div>
+                    </div>
+
+                    <div id="playersContainer" style="display: none;">
+                        <div class="players-list-container">
+                            <div class="players-list-title">ИГРОКИ ОНЛАЙН</div>
+                            <div class="players-names-list" id="playersList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="anketa" class="tab-pane">
+                    <div id="authBlock">
+                        <div class="form-group">
+                            <label>EMAIL</label>
+                            <input type="email" id="loginEmail" placeholder="Ваш email">
+                        </div>
+                        <div class="form-group">
+                            <label>ЛОГИН (НИКНЕЙМ)</label>
+                            <input type="text" id="loginUsername" placeholder="Ваш никнейм">
+                        </div>
+                        <div class="form-group">
+                            <label>ПАРОЛЬ</label>
+                            <input type="password" id="loginPassword" placeholder="Пароль (минимум 4 символа)">
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <button id="registerBtn" class="action-btn">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+                            <button id="loginBtn" class="action-btn">ВОЙТИ</button>
+                        </div>
+                    </div>
+
+                    <div id="anketaFormBlock" style="display: none;">
+                        <div id="userInfo" style="background: rgba(26, 28, 32, 0.9); padding: 12px; margin-bottom: 15px; text-align: center; font-family: 'Minecraft Custom', monospace; font-size: 0.65rem; border: 2px solid #2b2d31;">
+                            ВЫ ВОШЛИ КАК <span id="currentUser" style="color:#e0b354;"></span>
+                            <button id="logoutBtn" class="logout-btn" style="margin-left: 15px;">ВЫЙТИ</button>
+                        </div>
+                        
+                        <div id="cooldownBlock" class="cooldown-text" style="display: none;"></div>
+                        
+                        <form id="anketaForm">
+                            <div class="form-group">
+                                <label>ИГРОВОЙ НИКНЕЙМ</label>
+                                <input type="text" id="minecraftNick" required placeholder="Ваш ник в Minecraft">
+                            </div>
+                            <div class="form-group">
+                                <label>DISCORD (никнейм или ID)</label>
+                                <input type="text" id="discord" placeholder="username#0000">
+                            </div>
+                            <div class="form-group">
+                                <label>TELEGRAM (никнейм)</label>
+                                <input type="text" id="telegram" placeholder="@username">
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="discordSubscribe" required>
+                                <label for="discordSubscribe">
+                                    Я ПОДПИСАН НА <a href="https://discord.gg/vGaF7awwNB" target="_blank">DISCORD СЕРВЕР NATIONSHIELD</a> И ПРОЧИТАЛ ПРАВИЛА
+                                </label>
+                            </div>
+                            
+                            <div class="warning-text">
+                                УКАЖИТЕ ХОТЯ БЫ ОДИН КОНТАКТ (DISCORD ИЛИ TELEGRAM) ДЛЯ СВЯЗИ
+                            </div>
+                            
+                            <button type="submit" class="submit-btn" id="anketaSubmitBtn">ОТПРАВИТЬ ЗАЯВКУ</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="rules" class="tab-pane">
+                    <div style="text-align:center; margin-bottom:1rem;">
+                        <h2 style="font-size:1.1rem; color:#e0b354;">ПРАВИЛА NATIONSHIELD</h2>
+                    </div>
+                    <div class="warning-text" style="margin-bottom:1rem;">ЗАПРЕЩЕНО</div>
+                    <ul style="list-style:none; padding-left:0.5rem;">
+                        <li style="margin-bottom:0.8rem; border-left:3px solid #e0b354; padding-left:0.8rem; font-size:0.75rem;"><strong>1.1</strong> - Спам реклама, Флуд.</li>
+                        <li style="margin-bottom:0.8rem; border-left:3px solid #e0b354; padding-left:0.8rem; font-size:0.75rem;"><strong>1.2</strong> - 18+ контент: Ссылки на 18+ сайты, пиксель арты и тд</li>
+                        <li style="margin-bottom:0.8rem; border-left:3px solid #e0b354; padding-left:0.8rem; font-size:0.75rem;"><strong>1.3</strong> - Объявление войны/нападение на другое государство пока в сети нету хотя бы 1 гражданина их гос-во</li>
+                        <li style="margin-bottom:0.8rem; border-left:3px solid #e0b354; padding-left:0.8rem; font-size:0.75rem;"><strong>1.4</strong> - если игрок объявил войну и после не заходил в онлайн 4 дня, то начинается мирный договор, который запрещено нарушать 3 дня.</li>
+                        <li style="margin-bottom:0.8rem; border-left:3px solid #e0b354; padding-left:0.8rem; font-size:0.75rem;"><strong>1.5</strong> - использование чит клиентов и модов (XRAY, killaura, autototem). Мини-карты разрешены.</li>
+                        <li style="margin-bottom:0.8rem; border-left:3px solid #e0b354; padding-left:0.8rem; font-size:0.75rem;"><strong>1.6</strong> - слив личной информации без согласия человека.</li>
+                    </ul>
+                </div>
+
+                <div id="news" class="tab-pane">
+                    <div class="server-desc">АКТУАЛЬНЫЕ НОВОСТИ СЕРВЕРА</div>
+                    <div class="news-container" id="newsContainer">
+                        <div class="news-loading">📰 ЗАГРУЗКА НОВОСТЕЙ...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-dark">
+                NATIONSHIELD | РП ПОЛИТИЧЕСКИЙ | 1.21+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="version-hidden" id="versionText">v4.0</div>
+
+<script>
+    // ========== НАСТРОЙКИ ==========
+    const SERVER_ADDRESS = "NationShieldII.play-minecraft.net";
+    const JSONBIN_BIN_ID = "69eb0f90aaba882197310951";
+    const JSONBIN_API_KEY = "$2a$10$fbO1e/jkjaUXf51MQ3MROuFBtReAgofzV8SnwMMaRBMoJAp9eGlEu";
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1496602268030472205/ASbXtHZpYYXnewToI1uxbPhrmejEvdO6bow7TicNeLFxOEADJNrt1aEyhpnpIHcEu6Rv";
+    const COOLDOWN_MS = 4 * 60 * 60 * 1000;
+    const NEWS_FILE_URL = "https://raw.githubusercontent.com/nationshieldserverminecraft-ship-it/nationshieldserverminecraft-ship-it.github.io/main/now";
+
+    const ENCRYPT_KEY = 0x5A;
+    let lastUpdateTime = 0;
+    
+    function encryptPassword(password) {
+        let encrypted = '';
+        for (let i = 0; i < password.length; i++) {
+            encrypted += String.fromCharCode(password.charCodeAt(i) ^ ENCRYPT_KEY);
+        }
+        return btoa(encrypted);
+    }
+    
+    function decryptPassword(encryptedBase64) {
+        try {
+            const encrypted = atob(encryptedBase64);
+            let decrypted = '';
+            for (let i = 0; i < encrypted.length; i++) {
+                decrypted += String.fromCharCode(encrypted.charCodeAt(i) ^ ENCRYPT_KEY);
+            }
+            return decrypted;
+        } catch(e) {
+            return '';
+        }
+    }
+
+    // Данные форума
+    let forumPosts = [];
+    let userProfiles = {};
+    let currentUser = null;
+    let usersArray = [];
+    let openCommentsState = {};
+    let userReactions = {};
+    let lastPostId = 0;
+
+    // WebSocket симуляция (Long Polling) для мгновенных обновлений
+    async function listenForUpdates() {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': JSONBIN_API_KEY }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const newPosts = data.record?.forumPosts || [];
+                const newProfiles = data.record?.userProfiles || {};
+                const newReactions = data.record?.userReactions || {};
+                
+                // Проверяем, есть ли изменения
+                const postsChanged = JSON.stringify(forumPosts) !== JSON.stringify(newPosts);
+                const profilesChanged = JSON.stringify(userProfiles) !== JSON.stringify(newProfiles);
+                const reactionsChanged = JSON.stringify(userReactions) !== JSON.stringify(newReactions);
+                
+                if (postsChanged || profilesChanged || reactionsChanged) {
+                    forumPosts = newPosts;
+                    userProfiles = newProfiles;
+                    userReactions = newReactions;
+                    renderForumPosts();
+                    updateForumUI();
+                    if (currentUser) {
+                        const avatarData = getUserAvatar(currentUser);
+                        const avatarBtn = document.getElementById('profileAvatarBtn');
+                        if (avatarBtn) avatarBtn.textContent = avatarData || '👤';
+                    }
+                    showToast('🔄 НОВЫЕ ОБНОВЛЕНИЯ', 'info');
+                }
+            }
+        } catch (error) {}
+        
+        // Повторяем через 3 секунды (имитация реального времени)
+        setTimeout(listenForUpdates, 3000);
+    }
+
+    async function loadForumPosts() {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': JSONBIN_API_KEY }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.record && Array.isArray(data.record.forumPosts)) {
+                    forumPosts = data.record.forumPosts;
+                }
+                if (data.record && data.record.userProfiles) {
+                    userProfiles = data.record.userProfiles;
+                }
+                if (data.record && data.record.userReactions) {
+                    userReactions = data.record.userReactions;
+                }
+            }
+        } catch (error) {}
+        renderForumPosts();
+    }
+
+    async function saveForumPosts() {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': JSONBIN_API_KEY }
+            });
+            let currentData = { users: usersArray, forumPosts: forumPosts, userProfiles: userProfiles, userReactions: userReactions };
+            if (response.ok) {
+                const data = await response.json();
+                if (data.record) {
+                    currentData = data.record;
+                    currentData.forumPosts = forumPosts;
+                    currentData.userProfiles = userProfiles;
+                    currentData.userReactions = userReactions;
+                }
+            }
+            await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': JSONBIN_API_KEY
+                },
+                body: JSON.stringify(currentData)
+            });
+        } catch (error) {}
+    }
+
+    function getUserAvatar(username) {
+        return userProfiles[username]?.avatar || '👤';
+    }
+    
+    function getUserBio(username) {
+        return userProfiles[username]?.bio || 'Нет описания';
+    }
+    
+    function getAvatarHtml(username) {
+        return `<div class="author-avatar-small">${getUserAvatar(username)}</div>`;
+    }
+    
+    function getUserPostCount(username) {
+        const userPosts = forumPosts.filter(p => p.author === username);
+        let commentCount = 0;
+        function countComments(comments) {
+            for (let c of comments) {
+                commentCount++;
+                if (c.replies) countComments(c.replies);
+            }
+        }
+        for (let post of userPosts) {
+            if (post.comments) countComments(post.comments);
+        }
+        return { posts: userPosts.length, comments: commentCount };
+    }
+    
+    async function saveUserProfile(username, avatar, bio) {
+        userProfiles[username] = { avatar: avatar, bio: bio };
+        await saveForumPosts();
+        updateForumUI();
+        showToast('ПРОФИЛЬ СОХРАНЁН', 'success');
+    }
+
+    async function handleReaction(postId, type) {
+        if (!currentUser) {
+            showToast('ВОЙДИТЕ В АККАУНТ', 'error');
+            return;
+        }
+        
+        const postIndex = forumPosts.findIndex(p => p.id === postId);
+        if (postIndex === -1) return;
+        
+        const post = forumPosts[postIndex];
+        if (!post.reactions) {
+            post.reactions = { likes: 0, dislikes: 0 };
+        }
+        
+        const userKey = `${postId}_${currentUser}`;
+        const currentReaction = userReactions[userKey];
+        
+        if (currentReaction === type) {
+            if (type === 'like') post.reactions.likes--;
+            else post.reactions.dislikes--;
+            delete userReactions[userKey];
+        } else {
+            if (currentReaction === 'like') post.reactions.likes--;
+            if (currentReaction === 'dislike') post.reactions.dislikes--;
+            
+            if (type === 'like') post.reactions.likes++;
+            else post.reactions.dislikes++;
+            userReactions[userKey] = type;
+        }
+        
+        await saveForumPosts();
+        renderForumPosts();
+    }
+    
+    async function deletePost(postId) {
+        const postIndex = forumPosts.findIndex(p => p.id === postId);
+        if (postIndex === -1) return;
+        
+        if (forumPosts[postIndex].author !== currentUser) {
+            showToast('ВЫ НЕ АВТОР ЭТОГО ПОСТА', 'error');
+            return;
+        }
+        
+        forumPosts.splice(postIndex, 1);
+        await saveForumPosts();
+        renderForumPosts();
+        showToast('ПОСТ УДАЛЁН', 'success');
+    }
+    
+    async function reportPost(postId, reason) {
+        const post = forumPosts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const reportMessage = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `⚠️ НОВАЯ ЖАЛОБА НА ПОСТ\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `📝 ПОСТ: ${post.content.substring(0, 200)}\n` +
+            `👤 АВТОР: ${post.author}\n` +
+            `🚨 ЖАЛУЕТСЯ: ${currentUser || 'Не авторизован'}\n` +
+            `💬 ПРИЧИНА: ${reason}\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `🆔 ID ПОСТА: ${postId}`;
+        
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: reportMessage })
+            });
+            showToast('ЖАЛОБА ОТПРАВЛЕНА АДМИНИСТРАЦИИ', 'success');
+        } catch (error) {
+            showToast('ОШИБКА ОТПРАВКИ', 'error');
+        }
+    }
+
+    async function addForumPost(content) {
+        if (!currentUser) {
+            showToast('СНАЧАЛА ВОЙДИТЕ В АККАУНТ НА САЙТЕ', 'error');
+            return false;
+        }
+        if (!content.trim()) {
+            showToast('НАПИШИТЕ ТЕКСТ ПОСТА', 'error');
+            return false;
+        }
+        
+        const newPost = {
+            id: Date.now(),
+            author: currentUser,
+            content: content.trim(),
+            date: new Date().toLocaleString(),
+            comments: [],
+            reactions: { likes: 0, dislikes: 0 }
+        };
+        
+        forumPosts.unshift(newPost);
+        await saveForumPosts();
+        renderForumPosts();
+        showToast('ПОСТ ОПУБЛИКОВАН', 'success');
+        return true;
+    }
+    
+    function getTotalCommentsCount(comments) {
+        let count = comments.length;
+        for (let comment of comments) {
+            count += getTotalCommentsCount(comment.replies);
+        }
+        return count;
+    }
+    
+    async function addComment(postId, commentText, parentCommentId = null, parentContent = null) {
+        if (!currentUser) {
+            showToast('СНАЧАЛА ВОЙДИТЕ В АККАУНТ', 'error');
+            return false;
+        }
+        if (!commentText.trim()) {
+            showToast('НАПИШИТЕ ТЕКСТ КОММЕНТАРИЯ', 'error');
+            return false;
+        }
+        
+        const postIndex = forumPosts.findIndex(p => p.id === postId);
+        if (postIndex === -1) return false;
+        
+        const newComment = {
+            id: Date.now(),
+            author: currentUser,
+            content: commentText.trim(),
+            date: new Date().toLocaleString(),
+            replyToContent: parentContent || null,
+            replies: []
+        };
+        
+        if (parentCommentId) {
+            function findAndAddReply(commentsArray) {
+                for (let comment of commentsArray) {
+                    if (comment.id === parentCommentId) {
+                        comment.replies.push(newComment);
+                        return true;
+                    }
+                    if (comment.replies && findAndAddReply(comment.replies)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            findAndAddReply(forumPosts[postIndex].comments);
+        } else {
+            forumPosts[postIndex].comments.push(newComment);
+        }
+        
+        await saveForumPosts();
+        
+        const wasOpen = openCommentsState[postId];
+        renderForumPosts();
+        if (wasOpen) {
+            setTimeout(() => {
+                const commentsDiv = document.getElementById(`comments-${postId}`);
+                if (commentsDiv) commentsDiv.style.display = 'block';
+            }, 50);
+        }
+        
+        showToast('КОММЕНТАРИЙ ДОБАВЛЕН', 'success');
+        return true;
+    }
+    
+    function renderComments(comments, postId, level = 0) {
+        if (!comments || comments.length === 0) return '';
+        
+        let html = '';
+        for (let comment of comments) {
+            html += `
+                <div class="comment" id="comment-${comment.id}">
+                    <div class="comment-header">
+                        <div class="comment-author" onclick="viewUserProfile('${escapeHtml(comment.author)}')">
+                            ${getAvatarHtml(comment.author)} ${escapeHtml(comment.author)}
+                        </div>
+                        <div class="comment-date">📅 ${escapeHtml(comment.date)}</div>
+                    </div>
+                    ${comment.replyToContent ? `<div class="reply-quote">📎 Ответ на: "${escapeHtml(comment.replyToContent.substring(0, 100))}${comment.replyToContent.length > 100 ? '...' : ''}"</div>` : ''}
+                    <div class="comment-content">${escapeHtml(comment.content)}</div>
+                    <div class="comment-footer">
+                        <button class="reply-btn" onclick="showReplyForm(${postId}, ${comment.id}, '${escapeHtml(comment.content).replace(/'/g, "\\'")}')">📝 ОТВЕТИТЬ</button>
+                        <button class="comment-three-dots" onclick="toggleCommentMenu(${postId}, ${comment.id})">⋮</button>
+                    </div>
+                    <div id="comment-menu-${comment.id}" class="dropdown-menu" style="display: none; position: absolute; right: 10px; top: 30px;">
+                        <button onclick="reportComment(${postId}, ${comment.id})">🚨 ПОЖАЛОВАТЬСЯ</button>
+                        ${comment.author === currentUser ? `<button onclick="deleteComment(${postId}, ${comment.id})">🗑️ УДАЛИТЬ</button>` : ''}
+                    </div>
+                    <div id="reply-form-${postId}-${comment.id}" style="display: none;" class="comment-form">
+                        <textarea id="reply-text-${postId}-${comment.id}" rows="2" placeholder="НАПИШИТЕ ОТВЕТ..."></textarea>
+                        <button onclick="submitReply(${postId}, ${comment.id})">ОТПРАВИТЬ ОТВЕТ</button>
+                    </div>
+                    <div class="replies">
+                        ${renderComments(comment.replies, postId, level + 1)}
+                    </div>
+                </div>
+            `;
+        }
+        return html;
+    }
+    
+    function renderForumPosts() {
+        const container = document.getElementById('forumPostsList');
+        if (!container) return;
+        
+        if (forumPosts.length === 0) {
+            container.innerHTML = '<div class="no-posts-message">📭 ПОКА НЕТ ПОСТОВ. БУДЬТЕ ПЕРВЫМ!</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let post of forumPosts) {
+            const totalComments = getTotalCommentsCount(post.comments || []);
+            const isOpen = openCommentsState[post.id] || false;
+            const reactions = post.reactions || { likes: 0, dislikes: 0 };
+            const userReaction = userReactions[`${post.id}_${currentUser}`];
+            
+            html += `
+                <div class="forum-post" id="post-${post.id}">
+                    <div class="forum-post-header">
+                        <div class="forum-post-author" onclick="viewUserProfile('${escapeHtml(post.author)}')">
+                            ${getAvatarHtml(post.author)} ${escapeHtml(post.author)}
+                        </div>
+                        <div class="forum-post-date">📅 ${escapeHtml(post.date)}</div>
+                    </div>
+                    <div class="forum-post-content">${escapeHtml(post.content)}</div>
+                    <div class="forum-post-stats">
+                        <button class="like-btn ${userReaction === 'like' ? 'active' : ''}" onclick="handleReaction(${post.id}, 'like')">👍 ${reactions.likes}</button>
+                        <button class="dislike-btn ${userReaction === 'dislike' ? 'active' : ''}" onclick="handleReaction(${post.id}, 'dislike')">👎 ${reactions.dislikes}</button>
+                    </div>
+                    <div class="forum-post-actions">
+                        <div class="action-buttons">
+                            <button class="action-btn-small" onclick="toggleComments(${post.id})">💬 КОММЕНТАРИИ (${totalComments})</button>
+                        </div>
+                        <button class="three-dots-btn" onclick="togglePostMenu(${post.id})">⋮</button>
+                        <div id="post-menu-${post.id}" class="dropdown-menu" style="display: none;">
+                            <button onclick="reportPostPrompt(${post.id})">🚨 ПОЖАЛОВАТЬСЯ</button>
+                            ${post.author === currentUser ? `<button onclick="deletePost(${post.id})">🗑️ УДАЛИТЬ</button>` : ''}
+                        </div>
+                    </div>
+                    <div id="comments-${post.id}" style="display: ${isOpen ? 'block' : 'none'};" class="comments-section">
+                        <div class="comment-form" id="main-comment-form-${post.id}" style="margin-bottom: 10px;">
+                            <textarea id="comment-text-${post.id}" rows="2" placeholder="НАПИШИТЕ КОММЕНТАРИЙ..."></textarea>
+                            <button onclick="submitComment(${post.id})">ОТПРАВИТЬ КОММЕНТАРИЙ</button>
+                        </div>
+                        <div id="comments-list-${post.id}">
+                            ${renderComments(post.comments || [], post.id)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+    
+    // Глобальные функции
+    window.handleReaction = handleReaction;
+    window.deletePost = deletePost;
+    
+    window.reportPostPrompt = function(postId) {
+        const reason = prompt('УКАЖИТЕ ПРИЧИНУ ЖАЛОБЫ:');
+        if (reason && reason.trim()) {
+            reportPost(postId, reason);
+        }
+    };
+    
+    window.reportComment = async function(postId, commentId) {
+        const reason = prompt('УКАЖИТЕ ПРИЧИНУ ЖАЛОБЫ:');
+        if (!reason || !reason.trim()) return;
+        
+        function findComment(comments) {
+            for (let c of comments) {
+                if (c.id === commentId) return c;
+                if (c.replies) {
+                    const found = findComment(c.replies);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+        
+        const post = forumPosts.find(p => p.id === postId);
+        if (!post) return;
+        const comment = findComment(post.comments);
+        if (!comment) return;
+        
+        const reportMessage = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `⚠️ НОВАЯ ЖАЛОБА НА КОММЕНТАРИЙ\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `📝 КОММЕНТАРИЙ: ${comment.content.substring(0, 200)}\n` +
+            `👤 АВТОР: ${comment.author}\n` +
+            `🚨 ЖАЛУЕТСЯ: ${currentUser || 'Не авторизован'}\n` +
+            `💬 ПРИЧИНА: ${reason}\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `🆔 ID ПОСТА: ${postId}, ID КОММЕНТАРИЯ: ${commentId}`;
+        
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: reportMessage })
+            });
+            showToast('ЖАЛОБА ОТПРАВЛЕНА АДМИНИСТРАЦИИ', 'success');
+        } catch (error) {
+            showToast('ОШИБКА ОТПРАВКИ', 'error');
+        }
+    };
+    
+    window.deleteComment = async function(postId, commentId) {
+        const postIndex = forumPosts.findIndex(p => p.id === postId);
+        if (postIndex === -1) return;
+        
+        function findAndDeleteComment(comments) {
+            for (let i = 0; i < comments.length; i++) {
+                if (comments[i].id === commentId) {
+                    comments.splice(i, 1);
+                    return true;
+                }
+                if (comments[i].replies && findAndDeleteComment(comments[i].replies)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        findAndDeleteComment(forumPosts[postIndex].comments);
+        await saveForumPosts();
+        renderForumPosts();
+        showToast('КОММЕНТАРИЙ УДАЛЁН', 'success');
+    };
+    
+    window.togglePostMenu = function(postId) {
+        const menu = document.getElementById(`post-menu-${postId}`);
+        if (menu.style.display === 'none') {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+            menu.style.display = 'block';
+        } else {
+            menu.style.display = 'none';
+        }
+    };
+    
+    window.toggleCommentMenu = function(postId, commentId) {
+        const menu = document.getElementById(`comment-menu-${commentId}`);
+        if (menu.style.display === 'none') {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+            menu.style.display = 'block';
+        } else {
+            menu.style.display = 'none';
+        }
+    };
+    
+    window.toggleComments = function(postId) {
+        const commentsDiv = document.getElementById(`comments-${postId}`);
+        if (commentsDiv.style.display === 'none') {
+            commentsDiv.style.display = 'block';
+            openCommentsState[postId] = true;
+        } else {
+            commentsDiv.style.display = 'none';
+            openCommentsState[postId] = false;
+        }
+    };
+    
+    window.submitComment = async function(postId) {
+        const textarea = document.getElementById(`comment-text-${postId}`);
+        const content = textarea.value;
+        if (await addComment(postId, content)) {
+            textarea.value = '';
+        }
+    };
+    
+    window.showReplyForm = function(postId, commentId, parentContent) {
+        const form = document.getElementById(`reply-form-${postId}-${commentId}`);
+        const textarea = document.getElementById(`reply-text-${postId}-${commentId}`);
+        if (textarea) {
+            textarea.setAttribute('data-parent-content', parentContent);
+        }
+        if (form.style.display === 'none') {
+            document.querySelectorAll('.comment-form').forEach(f => f.style.display = 'none');
+            form.style.display = 'block';
+        } else {
+            form.style.display = 'none';
+        }
+    };
+    
+    window.submitReply = async function(postId, commentId) {
+        const textarea = document.getElementById(`reply-text-${postId}-${commentId}`);
+        const content = textarea.value;
+        const parentContent = textarea.getAttribute('data-parent-content') || '';
+        if (await addComment(postId, content, commentId, parentContent)) {
+            textarea.value = '';
+            const form = document.getElementById(`reply-form-${postId}-${commentId}`);
+            form.style.display = 'none';
+        }
+    };
+    
+    window.viewUserProfile = function(username) {
+        const avatar = getUserAvatar(username);
+        const bio = getUserBio(username);
+        const stats = getUserPostCount(username);
+        
+        document.getElementById('viewAvatar').innerHTML = avatar;
+        document.getElementById('viewName').textContent = username;
+        document.getElementById('viewBio').textContent = bio;
+        document.getElementById('viewStats').innerHTML = `📝 ПОСТОВ: ${stats.posts} | 💬 КОММЕНТАРИЕВ: ${stats.comments}`;
+        document.getElementById('profileViewModal').classList.add('open');
+    };
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function updateForumUI() {
+        const authBlock = document.getElementById('forumAuthBlock');
+        const contentBlock = document.getElementById('forumContentBlock');
+        const userNameSpan = document.getElementById('forumUserName');
+        const userBioSpan = document.getElementById('userBio');
+        const avatarBtn = document.getElementById('profileAvatarBtn');
+        
+        if (currentUser) {
+            authBlock.style.display = 'none';
+            contentBlock.style.display = 'flex';
+            contentBlock.style.flexDirection = 'column';
+            contentBlock.style.height = '100%';
+            if (userNameSpan) userNameSpan.textContent = currentUser;
+            if (userBioSpan) userBioSpan.textContent = getUserBio(currentUser);
+            if (avatarBtn) avatarBtn.textContent = getUserAvatar(currentUser);
+            loadForumPosts();
+        } else {
+            authBlock.style.display = 'flex';
+            contentBlock.style.display = 'none';
+        }
+    }
+
+    // Фоны
+    const backgrounds = [
+        'https://raw.githubusercontent.com/nationshieldserverminecraft-ship-it/nationshieldserverminecraft-ship-it.github.io/main/d79b83e54a58c9e29a1cd4f5d59951f1.jpg',
+        'https://raw.githubusercontent.com/nationshieldserverminecraft-ship-it/nationshieldserverminecraft-ship-it.github.io/main/5e24d87ca94a723d653f026aee0c8597.jpg',
+        'https://raw.githubusercontent.com/nationshieldserverminecraft-ship-it/nationshieldserverminecraft-ship-it.github.io/main/279633a822d7f5f5314300f3bd2ceedb%20(1).jpg'
+    ];
+    
+    const bgContainer = document.getElementById('bgContainer');
+    let currentBgIndex = 0;
+    let bgElements = [];
+    
+    backgrounds.forEach((url, index) => {
+        const bgDiv = document.createElement('div');
+        bgDiv.className = 'bg-image';
+        if (index === 0) bgDiv.classList.add('active');
+        bgDiv.style.backgroundImage = `url('${url}')`;
+        bgContainer.appendChild(bgDiv);
+        bgElements.push(bgDiv);
+    });
+    
+    function rotateBackground() {
+        const nextIndex = (currentBgIndex + 1) % bgElements.length;
+        bgElements[currentBgIndex].classList.remove('active');
+        bgElements[nextIndex].classList.add('active');
+        currentBgIndex = nextIndex;
+    }
+    setInterval(rotateBackground, 20000);
+
+    // Основная система пользователей
+    async function loadUsersFromCloud() {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': JSONBIN_API_KEY }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.record && Array.isArray(data.record.users)) {
+                    usersArray = data.record.users;
+                }
+                if (data.record && Array.isArray(data.record.forumPosts)) {
+                    forumPosts = data.record.forumPosts;
+                }
+                if (data.record && data.record.userProfiles) {
+                    userProfiles = data.record.userProfiles;
+                }
+                if (data.record && data.record.userReactions) {
+                    userReactions = data.record.userReactions;
+                }
+            }
+        } catch (error) {}
+        
+        const savedUser = localStorage.getItem('nationShield_currentUser');
+        if (savedUser && usersArray.find(u => u.username === savedUser)) {
+            currentUser = savedUser;
+        }
+        
+        updateUIForUser();
+        updateForumUI();
+    }
+
+    async function saveUsersToCloud() {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': JSONBIN_API_KEY }
+            });
+            let currentData = { users: usersArray, forumPosts: forumPosts, userProfiles: userProfiles, userReactions: userReactions };
+            if (response.ok) {
+                const data = await response.json();
+                if (data.record) {
+                    currentData = data.record;
+                    currentData.users = usersArray;
+                    currentData.forumPosts = forumPosts;
+                    currentData.userProfiles = userProfiles;
+                    currentData.userReactions = userReactions;
+                }
+            }
+            await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': JSONBIN_API_KEY
+                },
+                body: JSON.stringify(currentData)
+            });
+        } catch (error) {}
+    }
+
+    function findUserByUsername(username) {
+        return usersArray.find(u => u.username === username);
+    }
+
+    function findUserByEmail(email) {
+        return usersArray.find(u => u.email === email);
+    }
+
+    function getCooldownRemaining(username) {
+        const user = findUserByUsername(username);
+        if (!user || !user.lastApply) return 0;
+        const elapsed = Date.now() - user.lastApply;
+        if (elapsed >= COOLDOWN_MS) return 0;
+        return COOLDOWN_MS - elapsed;
+    }
+
+    async function updateLastApply(username) {
+        const user = findUserByUsername(username);
+        if (user) {
+            user.lastApply = Date.now();
+            await saveUsersToCloud();
+        }
+    }
+
+    async function register(email, username, password) {
+        if (!email || email.indexOf('@') === -1) {
+            showToast('ВВЕДИТЕ КОРРЕКТНЫЙ EMAIL', 'error');
+            return false;
+        }
+        if (username.length < 3) {
+            showToast('НИКНЕЙМ ДОЛЖЕН БЫТЬ НЕ МЕНЕЕ 3 СИМВОЛОВ', 'error');
+            return false;
+        }
+        if (password.length < 4) {
+            showToast('ПАРОЛЬ ДОЛЖЕН БЫТЬ НЕ МЕНЕЕ 4 СИМВОЛОВ', 'error');
+            return false;
+        }
+        if (findUserByUsername(username)) {
+            showToast('ПОЛЬЗОВАТЕЛЬ С ТАКИМ НИКОМ УЖЕ СУЩЕСТВУЕТ', 'error');
+            return false;
+        }
+        if (findUserByEmail(email)) {
+            showToast('ПОЛЬЗОВАТЕЛЬ С ТАКИМ EMAIL УЖЕ СУЩЕСТВУЕТ', 'error');
+            return false;
+        }
+        
+        const now = new Date();
+        const formattedDate = `${now.getDate().toString().padStart(2,'0')}.${(now.getMonth()+1).toString().padStart(2,'0')}.${now.getFullYear()}, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        
+        const encryptedPassword = encryptPassword(password);
+        
+        usersArray.push({
+            email: email,
+            username: username,
+            password: encryptedPassword,
+            registeredAt: formattedDate,
+            lastApply: null
+        });
+        await saveUsersToCloud();
+        showToast('РЕГИСТРАЦИЯ УСПЕШНА. ТЕПЕРЬ ВОЙДИТЕ.', 'success');
+        return true;
+    }
+
+    async function login(usernameOrEmail, password) {
+        let user = findUserByUsername(usernameOrEmail);
+        if (!user) user = findUserByEmail(usernameOrEmail);
+        
+        if (!user) {
+            showToast('ПОЛЬЗОВАТЕЛЬ НЕ НАЙДЕН', 'error');
+            return false;
+        }
+        
+        const storedPassword = decryptPassword(user.password);
+        if (storedPassword !== password) {
+            showToast('НЕВЕРНЫЙ ПАРОЛЬ', 'error');
+            return false;
+        }
+        
+        currentUser = user.username;
+        localStorage.setItem('nationShield_currentUser', currentUser);
+        showToast(`ДОБРО ПОЖАЛОВАТЬ, ${currentUser}`, 'success');
+        updateUIForUser();
+        updateForumUI();
+        return true;
+    }
+
+    function logout() {
+        currentUser = null;
+        localStorage.removeItem('nationShield_currentUser');
+        showToast('ВЫ ВЫШЛИ ИЗ АККАУНТА', 'info');
+        updateUIForUser();
+        updateForumUI();
+        document.getElementById('forumFullscreen').classList.remove('open');
+        document.getElementById('hamburgerMenu').classList.remove('active');
+        document.getElementById('profileModal').classList.remove('open');
+    }
+
+    function updateUIForUser() {
+        const authBlock = document.getElementById('authBlock');
+        const anketaBlock = document.getElementById('anketaFormBlock');
+        const currentUserSpan = document.getElementById('currentUser');
+        
+        if (currentUser) {
+            authBlock.style.display = 'none';
+            anketaBlock.style.display = 'block';
+            currentUserSpan.textContent = currentUser;
+            
+            const remaining = getCooldownRemaining(currentUser);
+            const cooldownBlock = document.getElementById('cooldownBlock');
+            const anketaForm = document.getElementById('anketaForm');
+            const submitBtn = document.getElementById('anketaSubmitBtn');
+            
+            if (remaining > 0) {
+                const hours = Math.floor(remaining / 3600000);
+                const minutes = Math.floor((remaining % 3600000) / 60000);
+                cooldownBlock.style.display = 'block';
+                cooldownBlock.innerHTML = `ВЫ УЖЕ ОТПРАВЛЯЛИ ЗАЯВКУ. СЛЕДУЮЩУЮ МОЖНО ОТПРАВИТЬ ЧЕРЕЗ ${hours} Ч ${minutes} МИН.`;
+                anketaForm.style.opacity = '0.5';
+                submitBtn.disabled = true;
+            } else {
+                cooldownBlock.style.display = 'none';
+                anketaForm.style.opacity = '1';
+                submitBtn.disabled = false;
+            }
+        } else {
+            authBlock.style.display = 'block';
+            anketaBlock.style.display = 'none';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+    }
+
+    async function sendApplication() {
+        if (!currentUser) {
+            showToast('СНАЧАЛА ВОЙДИТЕ В АККАУНТ', 'error');
+            return false;
+        }
+        
+        const remaining = getCooldownRemaining(currentUser);
+        if (remaining > 0) {
+            const hours = Math.floor(remaining / 3600000);
+            const minutes = Math.floor((remaining % 3600000) / 60000);
+            showToast(`ПОДОЖДИТЕ ${hours} Ч ${minutes} МИН ПЕРЕД СЛЕДУЮЩЕЙ ЗАЯВКОЙ`, 'error');
+            return false;
+        }
+
+        const minecraftNick = document.getElementById('minecraftNick').value.trim();
+        const discord = document.getElementById('discord').value.trim();
+        const telegram = document.getElementById('telegram').value.trim();
+        const subscribeCheckbox = document.getElementById('discordSubscribe');
+
+        if (!minecraftNick) {
+            showToast('УКАЖИТЕ ВАШ ИГРОВОЙ НИКНЕЙМ', 'error');
+            return false;
+        }
+        
+        if (!discord && !telegram) {
+            showToast('УКАЖИТЕ ХОТЯ БЫ ОДИН КОНТАКТ (DISCORD ИЛИ TELEGRAM)', 'error');
+            return false;
+        }
+        
+        if (!subscribeCheckbox.checked) {
+            showToast('ПОДТВЕРДИТЕ ПОДПИСКУ НА DISCORD СЕРВЕР', 'error');
+            return false;
+        }
+
+        let messageText = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        messageText += `НОВАЯ ЗАЯВКА НА ВСТУПЛЕНИЕ\n`;
+        messageText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        messageText += `НИКНЕЙМ: ${minecraftNick}\n`;
+        if (discord) messageText += `DISCORD: ${discord}\n`;
+        if (telegram) messageText += `TELEGRAM: ${telegram}\n`;
+        messageText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        messageText += `ПОДПИСАН НА DISCORD: ДА\n`;
+        messageText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        messageText += `ОТПРАВЛЕНО: ${new Date().toLocaleString()}\n`;
+        messageText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        messageText += `АККАУНТ: ${currentUser}\n`;
+        messageText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        messageText += `ЕСЛИ НЕ ПОДПИСАН - ЗАЯВКА БУДЕТ ОТКЛОНЕНА`;
+
+        try {
+            const response = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: messageText })
+            });
+
+            if (response.ok) {
+                showToast('ЗАЯВКА ОТПРАВЛЕНА. АДМИНИСТРАЦИЯ ПРОВЕРИТ ПОДПИСКУ.', 'success');
+                await updateLastApply(currentUser);
+                updateUIForUser();
+                document.getElementById('anketaForm').reset();
+                return true;
+            } else {
+                showToast('ОШИБКА ОТПРАВКИ. ПОПРОБУЙТЕ ПОЗЖЕ.', 'error');
+                return false;
+            }
+        } catch (error) {
+            showToast('ОШИБКА СОЕДИНЕНИЯ.', 'error');
+            return false;
+        }
+    }
+
+    async function loadNews() {
+        const newsContainer = document.getElementById('newsContainer');
+        if (!newsContainer) return;
+        
+        newsContainer.innerHTML = '<div class="news-loading">📰 ЗАГРУЗКА НОВОСТЕЙ...</div>';
+        
+        try {
+            const response = await fetch(NEWS_FILE_URL);
+            if (response.ok) {
+                const text = await response.text();
+                const formattedText = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/\n/g, '<br>');
+                newsContainer.innerHTML = `<div class="news-content">${formattedText}</div>`;
+            } else {
+                newsContainer.innerHTML = '<div class="news-error">❌ НЕ УДАЛОСЬ ЗАГРУЗИТЬ НОВОСТИ. ПОПРОБУЙТЕ ПОЗЖЕ.</div>';
+            }
+        } catch (error) {
+            newsContainer.innerHTML = '<div class="news-error">❌ ОШИБКА СОЕДИНЕНИЯ. НОВОСТИ НЕ ДОСТУПНЫ.</div>';
+        }
+    }
+
+    function showToast(msg, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    // Галерея аватаров
+    function createAvatarGallery() {
+        const avatars = ['👤', '⚔️', '🛡️', '👑', '🧙', '🏰', '🐉', '⚡', '🔥', '❄️', '🌿', '⭐', '🎮', '💎', '🏆', '📜', '🗡️', '🏹', '🔮', '💰', '🚀', '🎨', '📚', '🎵', '⚽', '🐺', '🦅', '🧝', '🧟', '👾', '🤖'];
+        
+        const gallery = document.getElementById('avatarGallery');
+        gallery.innerHTML = '';
+        avatars.forEach(avatar => {
+            const item = document.createElement('div');
+            item.className = 'avatar-option';
+            item.textContent = avatar;
+            item.onclick = () => {
+                document.querySelectorAll('.avatar-option').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+            };
+            gallery.appendChild(item);
+        });
+    }
+    
+    function openProfileModal() {
+        if (!currentUser) return;
+        const modal = document.getElementById('profileModal');
+        const bioInput = document.getElementById('profileBioInput');
+        bioInput.value = getUserBio(currentUser);
+        
+        const currentAvatar = getUserAvatar(currentUser);
+        document.querySelectorAll('.avatar-option').forEach(opt => {
+            if (opt.textContent === currentAvatar) {
+                opt.classList.add('selected');
+            } else {
+                opt.classList.remove('selected');
+            }
+        });
+        
+        modal.classList.add('open');
+    }
+    
+    function closeProfileModal() {
+        document.getElementById('profileModal').classList.remove('open');
+    }
+    
+    async function saveProfile() {
+        if (!currentUser) return;
+        const selectedAvatar = document.querySelector('.avatar-option.selected')?.textContent || '👤';
+        const bio = document.getElementById('profileBioInput').value;
+        await saveUserProfile(currentUser, selectedAvatar, bio);
+        closeProfileModal();
+        updateForumUI();
+    }
+
+    // Закрытие выпадающих меню
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.three-dots-btn') && !e.target.closest('.comment-three-dots')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
+
+    async function init() {
+        createAvatarGallery();
+        await loadUsersFromCloud();
+        await loadNews();
+        
+        // Запускаем прослушку обновлений
+        setTimeout(() => {
+            if (currentUser) listenForUpdates();
+        }, 2000);
+        
+        document.getElementById('registerBtn').onclick = async () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            await register(email, username, password);
+        };
+        
+        document.getElementById('loginBtn').onclick = async () => {
+            const loginInput = document.getElementById('loginEmail').value.trim() || document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            await login(loginInput, password);
+            setTimeout(() => {
+                if (currentUser) listenForUpdates();
+            }, 1000);
+        };
+        
+        document.getElementById('logoutBtn').onclick = () => logout();
+        document.getElementById('anketaForm').onsubmit = async (e) => {
+            e.preventDefault();
+            await sendApplication();
+        };
+        
+        document.getElementById('forumRedirectBtn').onclick = () => {
+            document.getElementById('forumFullscreen').classList.remove('open');
+            document.getElementById('hamburgerMenu').classList.remove('active');
+            const tabBtn = document.querySelector('.tab-btn[data-tab="anketa"]');
+            if (tabBtn) tabBtn.click();
+            showToast('АВТОРИЗУЙТЕСЬ НА САЙТЕ ДЛЯ ДОСТУПА К ФОРУМУ', 'info');
+        };
+        
+        document.getElementById('submitPostBtn').onclick = async () => {
+            const content = document.getElementById('newPostContent').value;
+            await addForumPost(content);
+            document.getElementById('newPostContent').value = '';
+        };
+        
+        document.getElementById('profileSettingsBtn').onclick = () => openProfileModal();
+        document.getElementById('profileAvatarBtn').onclick = () => openProfileModal();
+        document.getElementById('saveProfileBtn').onclick = () => saveProfile();
+        document.getElementById('closeProfileBtn').onclick = () => closeProfileModal();
+        document.getElementById('logoutFromSettingsBtn').onclick = () => logout();
+        document.getElementById('viewMyProfileBtn').onclick = () => viewUserProfile(currentUser);
+        document.getElementById('closeProfileViewBtn').onclick = () => document.getElementById('profileViewModal').classList.remove('open');
+        
+        document.getElementById('profileModal').onclick = (e) => {
+            if (e.target === document.getElementById('profileModal')) closeProfileModal();
+        };
+        document.getElementById('profileViewModal').onclick = (e) => {
+            if (e.target === document.getElementById('profileViewModal')) {
+                document.getElementById('profileViewModal').classList.remove('open');
+            }
+        };
+    }
+
+    init();
+
+    // Гамбургер-меню
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const forumFullscreen = document.getElementById('forumFullscreen');
+    const forumCloseBtn = document.getElementById('forumCloseBtn');
+    
+    hamburgerMenu.addEventListener('click', () => {
+        hamburgerMenu.classList.toggle('active');
+        forumFullscreen.classList.toggle('open');
+    });
+    
+    forumCloseBtn.addEventListener('click', () => {
+        forumFullscreen.classList.remove('open');
+        hamburgerMenu.classList.remove('active');
+    });
+
+    // Вкладки
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panes = document.querySelectorAll('.tab-pane');
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            panes.forEach(pane => pane.classList.remove('active-pane'));
+            document.getElementById(tabId).classList.add('active-pane');
+            tabs.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (tabId === 'news') loadNews();
+        });
+    });
+
+    // Копирование адреса
+    const ipElement = document.getElementById('clickableIp');
+    
+    function copyServerIp() {
+        const textToCopy = SERVER_ADDRESS;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast(`СКОПИРОВАНО: ${SERVER_ADDRESS}`, 'success');
+                ipElement.style.transform = 'scale(0.97)';
+                setTimeout(() => ipElement.style.transform = '', 120);
+            }).catch(() => fallbackCopy(textToCopy));
+        } else {
+            fallbackCopy(textToCopy);
+        }
+    }
+    
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-9999px';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showToast(`СКОПИРОВАНО: ${SERVER_ADDRESS}`, 'success');
+            ipElement.style.transform = 'scale(0.97)';
+            setTimeout(() => ipElement.style.transform = '', 120);
+        } catch (err) {
+            showToast(`НЕ УДАЛОСЬ СКОПИРОВАТЬ. АДРЕС: ${SERVER_ADDRESS}`, 'error');
+        }
+        document.body.removeChild(textarea);
+    }
+    
+    if (ipElement) {
+        ipElement.addEventListener('click', copyServerIp);
+        ipElement.style.cursor = 'pointer';
+    }
+
+    // Мониторинг сервера
+    let currentPlayers = 0, currentPlayerList = [], currentVersion = "", isOnline = false;
+    const onlineValueEl = document.getElementById('onlineValue');
+    const onlineSubEl = document.getElementById('onlineSub');
+    const versionValueEl = document.getElementById('versionValue');
+    const versionSubEl = document.getElementById('versionSub');
+    const playersContainer = document.getElementById('playersContainer');
+    const playersListEl = document.getElementById('playersList');
+    const onlineCard = document.getElementById('onlineCard');
+    
+    function updateServerUI() {
+        if (isOnline) {
+            onlineValueEl.innerHTML = `<span class="online-dot"></span>${currentPlayers}`;
+            onlineSubEl.textContent = currentPlayers === 1 ? "ИГРОК ОНЛАЙН" : "ИГРОКОВ ОНЛАЙН";
+            versionValueEl.textContent = currentVersion || "1.21+";
+            versionSubEl.textContent = "JAVA EDITION";
+        } else {
+            onlineValueEl.innerHTML = `<span class="offline-dot"></span>0`;
+            onlineSubEl.textContent = "СЕРВЕР НЕ ДОСТУПЕН";
+            versionValueEl.textContent = "--";
+            versionSubEl.textContent = "НЕТ ДАННЫХ";
+            playersContainer.style.display = 'none';
+        }
+    }
+    
+    function togglePlayersList() {
+        if (!isOnline || currentPlayers === 0) {
+            showToast("НА СЕРВЕРЕ НИКОГО НЕТ", 'error');
+            return;
+        }
+        if (playersContainer.style.display === 'none') {
+            playersListEl.innerHTML = '';
+            if (currentPlayerList.length > 0) {
+                currentPlayerList.forEach(player => {
+                    const playerSpan = document.createElement('span');
+                    playerSpan.className = 'player-name-item';
+                    playerSpan.textContent = player;
+                    playersListEl.appendChild(playerSpan);
+                });
+            } else {
+                playersListEl.innerHTML = '<div class="no-players-message">СПИСОК ИГРОКОВ НЕ ДОСТУПЕН</div>';
+            }
+            playersContainer.style.display = 'block';
+        } else {
+            playersContainer.style.display = 'none';
+        }
+    }
+    
+    if (onlineCard) onlineCard.addEventListener('click', togglePlayersList);
+    
+    async function fetchServerStatus() {
+        try {
+            const response = await fetch(`https://api.mcsrvstat.us/2/${SERVER_ADDRESS}`);
+            const data = await response.json();
+            if (data.online) {
+                isOnline = true;
+                currentPlayers = data.players?.online || 0;
+                currentPlayerList = data.players?.list || [];
+                currentVersion = data.version || "";
+            } else {
+                isOnline = false;
+            }
+            updateServerUI();
+        } catch (error) {
+            isOnline = false;
+            updateServerUI();
+        }
+    }
+    
+    fetchServerStatus();
+    setInterval(fetchServerStatus, 45000);
+
+    // Загрузка
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainContent = document.getElementById('mainContent');
+    const loadingBar = document.getElementById('loadingBar');
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            setTimeout(() => {
+                loadingScreen.classList.add('hide');
+                mainContent.classList.add('visible');
+            }, 300);
+        }
+        loadingBar.style.width = Math.min(progress, 100) + '%';
+    }, 150);
+    
+    setTimeout(() => {
+        if (progress < 100) {
+            clearInterval(interval);
+            loadingBar.style.width = '100%';
+            setTimeout(() => {
+                loadingScreen.classList.add('hide');
+                mainContent.classList.add('visible');
+            }, 300);
+        }
+    }, 3000);
+</script>
+</body>
+</html>
